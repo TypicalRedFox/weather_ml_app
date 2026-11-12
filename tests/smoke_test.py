@@ -14,7 +14,7 @@ class TestAppSmoke(unittest.TestCase):
 	# Complete the function below to test a form is rendered
 	def test_get_form(self):
 		response = self.client.get('/')
-		 self.assertIn(b'result.html',response.data)
+		 self.assertIn(b'form.html',response.data)
  
 if __name__ == '__main__':
 	unittest.main()
