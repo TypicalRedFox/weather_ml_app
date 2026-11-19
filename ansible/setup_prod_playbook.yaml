@@ -1,0 +1,54 @@
+---
+- name: setting up production and deployment for weather-ml
+  hosts: localhost
+  connection: local
+  tasks:
+  #installing libraries on the server for local work
+    - name: Installing python dependencies
+      become: yes
+      apt:
+        name:
+        #python to run code
+          - python3
+          #package manamgment
+          - python3-pip
+          #for isolated environments
+          - python3-venv
+          #library for python so that it can handle the http requests
+          - python3-flask
+        state: present
+        update_cache: yes
+
+    #for managing the kubernetes cluster
+    - name: Downloading kubectl
+      become: yes
+      get_url:
+        url: "https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kubectl"
+        dest: /usr/local/bin/kubectl
+        mode: '0755'
+
+    #starting local minikube for deployment testing
+    - name: downloading minikube
+      become: yes
+      get_url:
+        url: "https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64"
+        dest: /usr/local/bin/minikube
+        mode: '0755'
+
+    #creating a cluster where kubernetes will run weather-ml via docker driver
+    - name: Start minikube
+      command: minikube start --driver=docker
+      register: minikube_start
+      changed_when: "'finished' in minikube_start.stdout"
+
+      #deploying the pods for the application to run each instance
+    - name: Deploying the kubernetes application
+      command: kubectl apply -f ../k8s/deployment.yaml
+
+      #making a point of entry for the pods via port openings
+    - name: Creating kubernetes service
+      command: kubectl apply -f ../k8s/service.yaml
+
+      #setting up the deployment to work with 3 replicas
+    - name: Setting up the deployment to 3 replicas
+      command: kubectl scale deployment weather-ml-deployment --replicas=3
