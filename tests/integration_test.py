@@ -26,6 +26,9 @@ class TestModelAppIntegration(unittest.TestCase):
 	
 		# Complete below
 		# Ensure that the result page (response.data) should include a weather prediction
+		self.assertEqual(response.status_code, 200)
+		html = response.data.decode('utf-8').lower()
+		
 		self.assertIn(prediction,html)
 	
 		# Ensure that the result page should include a prediction time
