@@ -21,13 +21,19 @@ jobs:
         run: pip install --no-cache-dir -r requirements.txt
 
       - name: Integration Test
-        run: PYTHONPATH=. python3 tests/integration_test.py
+        run: |
+         export PYTHONPATH=$(pwd)
+         python3 tests/integration_test.py
 
-      # - name: Unit Test
-      #   run: PYTHONPATH=. python3 tests/unit_test.py
-
+      - name: Unit Test
+        run: |
+         export PYTHONPATH=$(pwd)
+         python3 tests/unit_test.py
+         
       - name: Smoke Test
-        run: PYTHONPATH=. python3 tests/smoke_test.py
+        run: |
+         export PYTHONPATH=$(pwd)
+         python3 tests/smoke_test.py
 
       - name: Docker Login
         uses: docker/login-action@v3
