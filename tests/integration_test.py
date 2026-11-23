@@ -26,10 +26,15 @@ class TestModelAppIntegration(unittest.TestCase):
 	
 		# Complete below
 		# Ensure that the result page (response.data) should include a weather prediction
+		self.assertEqual(response.status_code, 200)
+		html = response.data.decode('utf-8').lower()
 		
-	
-		# Ensure that the result page should include a prediction time
+		#checking for weather prediction
+		self.assertIn('the weather is:', html)
 		
+		#checking for prediction time 
+		#this uses regex to check there is a valid numerical value in the html with ms at the end
+		self.assertRegex(html, r'prediction time:</strong>\s*\d+(\.\d+)?\s*ms')
 
 		html_text = response.data.decode('utf-8').lower()
 		valid_classes = [
@@ -39,7 +44,7 @@ class TestModelAppIntegration(unittest.TestCase):
 		found = any(weather in html_text for weather in valid_classes)
 		
 		# Ensure that classification is in valid classes, provide an error message if not.
-		
+		self.assertTrue(any(valid in html for valid in valid_classes), "Invalid weather classification")
 
 if __name__ == '__main__':
 	unittest.main()
