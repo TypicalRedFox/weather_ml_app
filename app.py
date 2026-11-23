@@ -10,12 +10,15 @@ weather_classes = ['clear', 'cloudy', 'drizzly', 'foggy', 'hazey', 'misty', 'rai
 def load_model(model_path = 'model/model.pkl'):
 	return pickle.load(open(model_path, 'rb'))
 
+#WM - loading the model, moved outside of classify weather so as to not load it every time the method is called.
+model = load_model()
+
 def classify_weather(features):
-	model = load_model()
 	start = time.time()
 	prediction_index = model.predict(features)[0]
 	latency = round((time.time() - start) * 1000, 2) #we are here
-	prediction = weather_classes[1]
+		#WM - fixing the prediction as it would always return the index 1 of cloudy.
+	prediction = weather_classes[prediction_index]
 	
 	return prediction, latency
 
@@ -25,11 +28,12 @@ def home():
 	if request.method == 'POST':
 		try:
 			# Extract floats from form data
-			temperature = request.form['temperature']
-			pressure = request.form['pressure']
-			humidity = request.form['humidity']
-			wind_speed = request.form['wind_speed']
-			wind_deg = request.form['wind_deg']
+			# WM - fixed a bug here where not all fields were converted to float
+			temperature = float(request.form['temperature'])
+			pressure = float(request.form['pressure'])
+			humidity = float(request.form['humidity'])
+			wind_speed = float(request.form['wind_speed'])
+			wind_deg = float(request.form['wind_deg'])
 			rain_1h = float(request.form.get('rain_1h', 0) or 0)
 			rain_3h = float(request.form.get('rain_3h', 0) or 0)
 			snow = float(request.form.get('snow', 0) or 0)
@@ -50,6 +54,7 @@ def home():
 		except Exception as e:
 			error_msg = f"Error processing input: {e}"
 			return render_template('form.html', error=error_msg)
+
 	# GET method: show the input form
 	return render_template('form.html')
 
