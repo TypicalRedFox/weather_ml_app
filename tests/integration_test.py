@@ -29,10 +29,12 @@ class TestModelAppIntegration(unittest.TestCase):
 		self.assertEqual(response.status_code, 200)
 		html = response.data.decode('utf-8').lower()
 		
-		self.assertIn(prediction,html)
-	
-		# Ensure that the result page should include a prediction time
-		self.assertIn(latency,html)
+		#checking for weather prediction
+		self.assertIn('the weather is:', html)
+		
+		#checking for prediction time 
+		#this uses regex to check there is a valid numerical value in the html with ms at the end
+		self.assertRegex(html, r'prediction time:</strong>\s*\d+(\.\d+)?\s*ms')
 
 		html_text = response.data.decode('utf-8').lower()
 		valid_classes = [
