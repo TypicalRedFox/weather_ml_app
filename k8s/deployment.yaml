@@ -1,32 +1,32 @@
-# creating a kubernetes deployment that will manage pod creation, instances, replacements of failed pods
+# WM - creating a kubernetes deployment that will manage pod creation, instances, replacements of failed pods
 # and rolling out updates
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: weather-ml-deployment
 spec:
-  # keeping 3 instances of pods for the application
+  # WM - keeping 3 instances of pods for the application
   replicas: 3
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      # only one pod can be unavailable at the very maximum, and it can max out at 4 pods.
+      # WM - only one pod can be unavailable at the very maximum, and it can max out at 4 pods.
       maxUnavailable: 1
       maxSurge: 1
-  # select the pods with weather-ml for management
+  # WM - select the pods with weather-ml for management
   selector:
     matchLabels:
       app: weather-ml
-  # kubernetes blueprint for when new pods are created
+  # WM - kubernetes blueprint for when new pods are created
   template:
     metadata:
-      # label applied to new pods created in the deployment
+      # WM - label applied to new pods created in the deployment
       labels:
         app: weather-ml
     spec:
       containers:
         - name: weather-ml-container
-          # relevant docker image that has the application in it
+          # WM - relevant docker image that has the application in it
           image: williammcsh04/weather_ml_app:latest
           ports:
             - containerPort: 5000

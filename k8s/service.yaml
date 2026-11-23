@@ -1,19 +1,19 @@
-# creating a service for the deployed pods that allows them to be located by name.
+# WM - creating a service for the deployed pods that allows them to be located by name.
 apiVersion: v1
 kind: Service
 metadata:
-  # name so we can find the service in the cluster
+  # WM - name so we can find the service in the cluster
   name: weather-ml-service
 spec:
-  # each node will expose the application with a port
+  # WM - each node will expose the application with a port
   type: NodePort
   selector:
-    # traffic is sent to pods labelled relevant to the project
+    # WM - traffic is sent to pods labelled relevant to the project
     app: weather-ml
-  # setting up tcp with exposed port and the listening port
+  # WM - setting up tcp with exposed port and the listening port
   ports:
     - protocol: TCP
       port: 5000
       targetPort: 5000
-      # nodeport to access the app
+      # WM - nodeport to access the app
       nodePort: 30007
