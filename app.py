@@ -53,7 +53,8 @@ def home():
 
 		except Exception as e:
 			error_msg = f"Error processing input: {e}"
-			return render_template('form.html', error=error_msg)
+			#WM - fixing this to return a 400 status code specifically
+			return render_template('form.html', error=error_msg), 400
 
 	# GET method: show the input form
 	return render_template('form.html')

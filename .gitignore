@@ -6,3 +6,5 @@
 *.db
 __pycache__/
 *.pyc
+/tests/__pycache__/unit_test.cpython-312.pyc
+/tests/__pycache__/unit_test.cpython-312.pyc
