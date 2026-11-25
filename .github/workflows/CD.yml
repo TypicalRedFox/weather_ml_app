@@ -1,62 +1,51 @@
-name : CD
+name: CD Pipeline
 
-on: 
-    workflow_run:
-workflows: ["CI Pipeline"]
-types : [completed]
-branches [main]
-workflow_dispatch:
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
 
-persmissions:
-contents: read
+# Run this workflow after CI finishes successfully on main -JL
+permissions:
+  contents: read
 
 concurrency:
+  group: weather-ml-production
+  cancel-in-progress: false
 
-group: weather-ml-production
-cancel-in-progress: false
 
+# Deploy automatically only when CI succeeded.
+    # Manual runs can also proceed. -JL
 jobs:
   deploy:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
 
-steps:
-      - name: Checkout repository
+    steps:
+      - name: Check out the CI-passed commit
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: latest
 
-      - name: Configure Kubernetes
+#Check which Kubernetes context the runner will use then verify that it can communicate with the cluster. -JL
+      
+
+      - name: Verify Kubernetes access
+        run: |
+          kubectl config current-context
+          kubectl get nodes
+
+      - name: Deploy and wait for rolling update
         env:
-          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
           set -euo pipefail
 
-          if [ -z "$KUBE_CONFIG" ]; then
-            echo "Missing GitHub secret: KUBE_CONFIG"
-            exit 1
-          fi
-
- mkdir -p "$RUNNER_TEMP/.kube"
-          printf '%s' "$KUBE_CONFIG" > "$RUNNER_TEMP/.kube/config"
-          chmod 600 "$RUNNER_TEMP/.kube/config"
-          echo "KUBECONFIG=$RUNNER_TEMP/.kube/config" >> "$GITHUB_ENV"
-
-
-name: Kubernetes Deployment
-
-env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          run: |
-          set -euo pipefail
-
           if [ -z "$DOCKERHUB_USERNAME" ]; then
-            echo "Missing GitHub secret: DOCKERHUB_USERNAME"
+            echo "Missing GitHub secret: DOCKERHUB_USERNAME" >&2
             exit 1
           fi
 
@@ -65,6 +54,4 @@ env:
             weather-ml-container="$DOCKERHUB_USERNAME/weather_ml_app:latest"
 
           kubectl rollout status deployment/weather-ml-deployment \
-         --timeout=180s
-    
-
+            --timeout=180s
