@@ -1,18 +1,70 @@
-name: CD
+name : CD
 
-on:
-  push:
-    branches:
-      - main
+on: 
+    workflow_run:
+workflows: ["CI Pipeline"]
+types : [completed]
+branches [main]
+workflow_dispatch:
+
+persmissions:
+contents: read
+
+concurrency:
+
+group: weather-ml-production
+cancel-in-progress: false
 
 jobs:
   deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
-    steps:
+steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
-      - name: Deploy
-        run: echo "Add deployment commands here"
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: latest
+
+      - name: Configure Kubernetes
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "$KUBE_CONFIG" ]; then
+            echo "Missing GitHub secret: KUBE_CONFIG"
+            exit 1
+          fi
+
+ mkdir -p "$RUNNER_TEMP/.kube"
+          printf '%s' "$KUBE_CONFIG" > "$RUNNER_TEMP/.kube/config"
+          chmod 600 "$RUNNER_TEMP/.kube/config"
+          echo "KUBECONFIG=$RUNNER_TEMP/.kube/config" >> "$GITHUB_ENV"
+
+
+name: Kubernetes Deployment
+
+env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          run: |
+          set -euo pipefail
+
+          if [ -z "$DOCKERHUB_USERNAME" ]; then
+            echo "Missing GitHub secret: DOCKERHUB_USERNAME"
+            exit 1
+          fi
+
+          kubectl apply -f k8s/
+          kubectl set image deployment/weather-ml-deployment \
+            weather-ml-container="$DOCKERHUB_USERNAME/weather_ml_app:latest"
+
+          kubectl rollout status deployment/weather-ml-deployment \
+         --timeout=180s
+    
 
