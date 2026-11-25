@@ -17,7 +17,7 @@ concurrency:
 
 
 # Deploy automatically only when CI succeeded.
-    # Manual runs can also proceed. -JL
+# Manual runs can also proceed. -JL
 jobs:
   deploy:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
@@ -31,7 +31,7 @@ jobs:
 
 
 #Check which Kubernetes context the runner will use then verify that it can communicate with the cluster. -JL
-      
+
 
       - name: Verify Kubernetes access
         run: |
@@ -52,6 +52,9 @@ jobs:
           kubectl apply -f k8s/
           kubectl set image deployment/weather-ml-deployment \
             weather-ml-container="$DOCKERHUB_USERNAME/weather_ml_app:latest"
+
+          #WM - adding this to force a restart of the deployment so that it takes the new image
+          kubectl rollout restart deployment/weather-ml-deployment
 
           kubectl rollout status deployment/weather-ml-deployment \
             --timeout=180s

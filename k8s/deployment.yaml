@@ -29,6 +29,7 @@ spec:
       containers:
         - name: weather-ml-container
           image: williammcsh04/weather_ml_app:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 5000
           readinessProbe:
