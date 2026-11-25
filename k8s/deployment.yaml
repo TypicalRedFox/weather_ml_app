@@ -27,6 +27,12 @@ spec:
       containers:
         - name: weather-ml-container
           # WM - relevant docker image that has the application in it
+          # added some extra security so that it can retry and rerun if kube fails
           image: williammcsh04/weather_ml_app:latest
           ports:
-            - containerPort: 5000
+           readinessProbe:
+            httpGet:
+            path: /
+            port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5
