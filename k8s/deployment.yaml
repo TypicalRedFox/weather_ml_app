@@ -23,9 +23,9 @@ spec:
       # WM - label applied to new pods created in the deployment
       labels:
         app: weather-ml
-# WM - relevant docker image that has the application in it
-# added some extra security so that it can retry and rerun if kube fails
-spec:
+    # WM - relevant docker image that has the application in it
+    # added some extra security so that it can retry and rerun if kube fails
+    spec:
       containers:
         - name: weather-ml-container
           image: williammcsh04/weather_ml_app:latest
