@@ -51,7 +51,7 @@ jobs:
 
           kubectl apply -f k8s/
           kubectl set image deployment/weather-ml-deployment \
-            weather-ml-container="$DOCKERHUB_USERNAME/weather_ml_app:latest"
+            weather-ml-container="$DOCKERHUB_USERNAME/weather_ml_app:v1"
 
           #WM - adding this to force a restart of the deployment so that it takes the new image
           kubectl rollout restart deployment/weather-ml-deployment

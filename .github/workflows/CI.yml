@@ -44,12 +44,12 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build docker image
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/weather_ml_app:latest .
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/weather_ml_app:v1 .
 
       # e - launching a test container to verify functionality
       - name: Build test
         run: |
-          docker run -d --name weather-test -p 5000:5000 ${{ secrets.DOCKERHUB_USERNAME }}/weather_ml_app:latest
+          docker run -d --name weather-test -p 5000:5000 ${{ secrets.DOCKERHUB_USERNAME }}/weather_ml_app:v1
           sleep 5
           docker exec weather-test echo "the container is up and running!"
           docker stop weather-test
@@ -63,4 +63,4 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Push docker image
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/weather_ml_app:latest
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/weather_ml_app:v1
