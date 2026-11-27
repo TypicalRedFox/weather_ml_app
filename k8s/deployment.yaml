@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: weather-ml-container
-          image: williammcsh04/weather_ml_app:v1
+          image: williammcsh04/weather_ml_app:v2
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
